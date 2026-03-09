@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "deepmirt"
+version = "1.0.0"
+description = "DeepMiRT: miRNA target prediction using RNA foundation models and cross-attention"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Zicheng Liu"},
+]
+keywords = [
+    "mirna", "target-prediction", "rna", "deep-learning",
+    "bioinformatics", "transformer", "pytorch", "rna-fm",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=1.12",
+    "rna-fm",
+    "pytorch-lightning>=2.0",
+    "torchmetrics",
+    "pyyaml",
+    "scikit-learn",
+    "numpy",
+    "pandas",
+    "huggingface-hub",
+]
+
+[project.optional-dependencies]
+demo = ["gradio>=4.0"]
+eval = ["matplotlib", "seaborn"]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+deepmirt-predict = "insect_mirna_target.predict:cli_main"
+
+[project.urls]
+Homepage = "https://github.com/lzc199809-cloud/DeepMiRT"
+Documentation = "https://github.com/lzc199809-cloud/DeepMiRT#readme"
+Repository = "https://github.com/lzc199809-cloud/DeepMiRT"
+Issues = "https://github.com/lzc199809-cloud/DeepMiRT/issues"
+
+[tool.setuptools.packages.find]
+include = ["insect_mirna_target*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

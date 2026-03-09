@@ -1,0 +1,55 @@
+# ============================================================
+# miRNA target prediction model — default evaluation configuration
+# ============================================================
+# Usage:
+#   python -m insect_mirna_target.evaluation.run_full_evaluation \
+#       --ckpt checkpoints/epoch=27-val_auroc=0.9612.ckpt \
+#       --config insect_mirna_target/configs/default.yaml \
+#       --test-csv insect_mirna_target/data/training/test.csv \
+#       --output-dir evaluation_outputs/
+# ============================================================
+
+# ---- Inference configuration ----
+inference:
+  batch_size: 256
+  num_workers: 8
+  device: "cuda"
+
+# ---- Metrics computation ----
+metrics:
+  threshold: 0.5
+  n_bootstrap: 1000
+  confidence: 0.95
+
+# ---- Stratified evaluation ----
+stratified:
+  n_bootstrap: 1000
+
+# ---- Calibration analysis ----
+calibration:
+  n_bins: 15
+
+# ---- Frequency bias analysis ----
+frequency_bias:
+  n_quintiles: 5
+  n_bootstrap: 1000
+  train_csv: "insect_mirna_target/data/training/train.csv"
+
+# ---- Error analysis ----
+error_analysis:
+  threshold: 0.5
+
+# ---- Comparison analysis ----
+comparison:
+  run_mirbench: true
+  run_external_tools: true
+  mirbench_sample_size: 50000
+  external_sample_size: 10000
+  seed: 42
+
+# ---- Visualization ----
+visualization:
+  dpi: 300
+  formats:
+    - pdf
+    - png

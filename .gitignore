@@ -1,0 +1,81 @@
+# Environment variables (API keys and secrets)
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Model checkpoints (large binary files, hosted on Hugging Face Hub)
+checkpoints/
+*.ckpt
+
+# Training data (too large for Git)
+insect_mirna_target/data/
+
+# Study data (very large)
+study/
+
+# Evaluation outputs (regenerable)
+evaluation_outputs/
+
+# Logs
+lightning_logs/
+logs/
+*.log
+.log_watch_state.json
+
+# Session and tool artifacts
+opencode_sessions_md/
+session_exports/
+.sisyphus/
+.claude/
+
+# Literature download system (internal tool)
+literature_download_system/
+
+# Internal pipeline scripts (data preprocessing)
+insect_mirna_target/pipeline/
+
+# One-off scripts (not part of the package)
+convert_sessions_to_md.py
+dataset_list.tsv
+download_38_usable_datasets.sh
+evaluate.py
+filter_sessions.py
+run_comparison_only.py
+AGENTS.md
+LOGGING_GUIDE.md
+TRAINING_GUIDE.md
+insect_mirna_target/MANUAL_RUN_GUIDE.md
+insect_mirna_target/requirements-ml.txt
+
+# Internal tool scripts
+tools_*.sh
+tools_*.py
+wget-log
+调试日志
+
+# Internal assets (literature pipeline examples)
+insect_mirna_target/assets/
+
+# Literature pipeline tests (pipeline itself is excluded)
+insect_mirna_target/tests/test_literature_*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
