@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from deepmirt.pipeline.site_utils import _normalize_dna
 
 if TYPE_CHECKING:
-    from deepmirt.scanning.scanner import ScanHit, TargetScanResult
+    from deepmirt.scanning.scanner import TargetScanResult
 
 
 def _generate_alignment(mirna_seq: str, window_seq: str, seed_type: str) -> str:
@@ -32,7 +32,6 @@ def _generate_alignment(mirna_seq: str, window_seq: str, seed_type: str) -> str:
     # In the reversed miRNA, the seed region (original 5'-end positions 1-7)
     # maps to reversed positions (mirna_len-8) to (mirna_len-2).
     seed_start_rev = mirna_len - 8  # first seed position in reversed miRNA
-    seed_end_rev = mirna_len - 1    # one past last seed position (excl. pos 0)
 
     # The window was extracted centered on the seed match, so the seed match
     # is near the center of the window. Find the core seed complement (7mer-m8
