@@ -242,7 +242,7 @@ DeepMiRT/
 ## Citation
 
 ```bibtex
-@software{zhang2026deepmirt,
+@software{liu2026deepmirt,
   title={DeepMiRT: miRNA Target Prediction with RNA Foundation Models},
   author={Liu, Zicheng},
   year={2026},
