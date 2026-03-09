@@ -43,6 +43,7 @@ literature_download_system/
 deepmirt/pipeline/
 
 # One-off scripts (not part of the package)
+analyze_clash.py
 convert_sessions_to_md.py
 dataset_list.tsv
 download_38_usable_datasets.sh

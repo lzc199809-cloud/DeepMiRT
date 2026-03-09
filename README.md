@@ -305,6 +305,8 @@ On the CLASH dataset, DeepMiRT ranks #5 (honest reporting -- CLASH captures diff
 
 ![Benchmark Comparison](docs/benchmark_comparison.png)
 
+> **Note:** DeepMiRT excels at target site identification (eCLIP-type tasks) but is less suited for distinguishing competitive binding among multiple miRNAs at the same target site (CLASH-type tasks).
+
 <details>
 <summary>Training your own model</summary>
 
