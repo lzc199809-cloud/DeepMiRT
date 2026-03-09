@@ -1,1 +1,1 @@
-"""miRNA 靶基因预测模型 — 综合评估框架。"""
+"""miRNA target prediction model — comprehensive evaluation framework."""

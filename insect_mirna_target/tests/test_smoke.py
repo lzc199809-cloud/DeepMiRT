@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-端到端 Smoke Test — 验证训练管线各组件正常工作。
+End-to-end smoke test — verify that all training pipeline components work correctly.
 
-运行方式:
+Usage:
     conda run -n deeplearn python -m pytest insect_mirna_target/tests/test_smoke.py -v --tb=short
     conda run -n deeplearn python -m unittest insect_mirna_target.tests.test_smoke -v
 """
@@ -18,10 +18,10 @@ if _PROJECT_ROOT not in sys.path:
 
 
 class TestSmokeEnvironment(unittest.TestCase):
-    """环境和依赖验证"""
+    """Environment and dependency verification."""
 
     def test_import_dependencies(self):
-        """验证所有 ML 依赖可导入"""
+        """Verify all ML dependencies can be imported."""
         import fm
         import pytorch_lightning
         import torchmetrics
@@ -30,41 +30,41 @@ class TestSmokeEnvironment(unittest.TestCase):
         import torch
 
     def test_rnafm_model_loads(self):
-        """验证 RNA-FM 模型可加载"""
+        """Verify RNA-FM model can be loaded."""
         import fm
         model, alphabet = fm.pretrained.rna_fm_t12()
         self.assertEqual(len(model.layers), 12)
         self.assertIsNotNone(alphabet.padding_idx)
 
     def test_gpu_available(self):
-        """验证 GPU 可用"""
+        """Verify GPU is available."""
         import torch
         self.assertTrue(torch.cuda.is_available())
         self.assertGreaterEqual(torch.cuda.device_count(), 1)
 
 
 class TestSmokePreprocessing(unittest.TestCase):
-    """数据预处理验证"""
+    """Data preprocessing verification."""
 
     def test_dna_to_rna(self):
-        """验证 T→U 转换"""
+        """Verify T->U conversion."""
         from insect_mirna_target.data_module.preprocessing import dna_to_rna
         self.assertEqual(dna_to_rna('ATCGATCG'), 'AUCGAUCG')
         self.assertEqual(dna_to_rna('AUCGAUCG'), 'AUCGAUCG')  # idempotent
         self.assertEqual(dna_to_rna('atcg'), 'AUCG')
 
     def test_validate_rna_sequence(self):
-        """验证 RNA 序列验证"""
+        """Verify RNA sequence validation."""
         from insect_mirna_target.data_module.preprocessing import validate_rna_sequence
         self.assertTrue(validate_rna_sequence('AUCGAUCG', 5, 30))
         self.assertFalse(validate_rna_sequence('ATCG', 5, 30))  # contains T
 
 
 class TestSmokeDataset(unittest.TestCase):
-    """Dataset 和 DataModule 验证"""
+    """Dataset and DataModule verification."""
 
     def test_dataset_loads_sample(self):
-        """验证 Dataset 可加载 val.csv"""
+        """Verify Dataset can load val.csv."""
         import fm
         from insect_mirna_target.data_module.dataset import MiRNATargetDataset
         _, alphabet = fm.pretrained.rna_fm_t12()
@@ -76,7 +76,7 @@ class TestSmokeDataset(unittest.TestCase):
         self.assertIn('label', sample)
 
     def test_datamodule_batch(self):
-        """验证 DataModule 生成正确的 batch"""
+        """Verify DataModule produces correct batch format."""
         from insect_mirna_target.data_module.datamodule import MiRNATargetDataModule
         dm = MiRNATargetDataModule(
             data_dir='insect_mirna_target/data/training',
@@ -90,10 +90,10 @@ class TestSmokeDataset(unittest.TestCase):
 
 
 class TestSmokeModel(unittest.TestCase):
-    """模型验证"""
+    """Model verification."""
 
     def test_model_forward_pass(self):
-        """验证模型前向传播 shape 正确"""
+        """Verify model forward pass produces correct output shape."""
         import torch
         import fm
         from insect_mirna_target.model.mirna_target_model import MiRNATargetModel
@@ -110,10 +110,10 @@ class TestSmokeModel(unittest.TestCase):
 
 
 class TestSmokeLightning(unittest.TestCase):
-    """Lightning 训练模块验证"""
+    """Lightning training module verification."""
 
     def test_lightning_module_training_step(self):
-        """验证 Lightning module training_step 不报错"""
+        """Verify Lightning module training_step runs without error."""
         import torch
         import fm
         from insect_mirna_target.training.lightning_module import MiRNATargetLitModule
