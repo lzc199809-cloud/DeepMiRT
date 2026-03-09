@@ -63,3 +63,7 @@ target-version = "py39"
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"deepmirt/training/train.py" = ["E402"]
+"deepmirt/tests/test_split_leakage.py" = ["E402", "F841"]
