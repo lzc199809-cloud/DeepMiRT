@@ -218,6 +218,66 @@ def predict_from_csv(
     return df
 
 
+def scan_targets(
+    mirna_fasta: str | dict[str, str],
+    target_fasta: str,
+    output_prefix: str | None = None,
+    device: str = "cpu",
+    batch_size: int = 512,
+    prob_threshold: float = 0.5,
+    scan_mode: str = "hybrid",
+    stride: int = 20,
+    top_k: int | None = None,
+) -> list:
+    """
+    Scan target sequences for miRNA binding sites genome-wide.
+
+    Identifies candidate binding positions using seed matching and/or sliding
+    windows, then scores each position with the DeepMiRT model.
+
+    Args:
+        mirna_fasta: Path to miRNA FASTA file, or dict of {id: sequence}.
+        target_fasta: Path to target FASTA file (e.g. 3'UTRs or transcripts).
+        output_prefix: If given, write {prefix}_details.txt, {prefix}_hits.tsv,
+            and {prefix}_summary.tsv.
+        device: Inference device ("cpu" or "cuda").
+        batch_size: Batch size for GPU inference.
+        prob_threshold: Minimum probability to report a hit (default 0.5).
+        scan_mode: Scanning strategy -- "seed" (fastest), "hybrid" (default),
+            or "exhaustive" (slowest, stride-1).
+        stride: Window stride for hybrid/exhaustive modes (default 20).
+        top_k: If set, keep only the top-K hits per miRNA-target pair.
+
+    Returns:
+        List of TargetScanResult objects, one per miRNA-target pair with hits.
+        Each result contains a list of ScanHit objects with position, probability,
+        seed type, and the 40nt window sequence.
+
+    Example:
+        >>> from deepmirt import scan_targets
+        >>> results = scan_targets(
+        ...     mirna_fasta={"let-7": "UGAGGUAGUAGGUUGUAUAGUU"},
+        ...     target_fasta="3utrs.fa",
+        ...     output_prefix="results/scan",
+        ...     device="cuda",
+        ... )
+        >>> for r in results:
+        ...     for hit in r.hits:
+        ...         print(f"{r.target_id} pos={hit.position} prob={hit.probability:.3f}")
+    """
+    from deepmirt.scanning.scanner import TargetScanner
+
+    scanner = TargetScanner(
+        device=device,
+        batch_size=batch_size,
+        prob_threshold=prob_threshold,
+        scan_mode=scan_mode,
+        stride=stride,
+        top_k=top_k,
+    )
+    return scanner.scan(mirna_fasta, target_fasta, output_prefix)
+
+
 def cli_main() -> None:
     """Command-line entry point for deepmirt-predict."""
     parser = argparse.ArgumentParser(
@@ -241,6 +301,26 @@ def cli_main() -> None:
     batch.add_argument("--mirna-col", default="mirna_seq", help="miRNA column name")
     batch.add_argument("--target-col", default="target_seq", help="Target column name")
 
+    # Genome-wide scanning
+    scan = subparsers.add_parser(
+        "scan", help="Scan target sequences for miRNA binding sites"
+    )
+    scan_input = scan.add_mutually_exclusive_group(required=True)
+    scan_input.add_argument("--mirna-fasta", help="miRNA FASTA file")
+    scan_input.add_argument("--mirna", help="Single miRNA sequence (use with --mirna-id)")
+    scan.add_argument("--mirna-id", default="query_mirna", help="miRNA ID (with --mirna)")
+    scan.add_argument("--target-fasta", required=True, help="Target FASTA file")
+    scan.add_argument("--output", required=True, help="Output prefix")
+    scan.add_argument("--device", default="cpu", help="Device (cpu or cuda)")
+    scan.add_argument("--batch-size", type=int, default=512, help="Batch size")
+    scan.add_argument("--threshold", type=float, default=0.5, help="Probability threshold")
+    scan.add_argument(
+        "--scan-mode", default="hybrid", choices=["seed", "hybrid", "exhaustive"],
+        help="Scanning mode (default: hybrid)",
+    )
+    scan.add_argument("--stride", type=int, default=20, help="Window stride (default: 20)")
+    scan.add_argument("--top-k", type=int, default=None, help="Keep top-K hits per target")
+
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -261,6 +341,29 @@ def cli_main() -> None:
             target_col=args.target_col,
         )
         print(f"Processed {len(df)} samples. Results saved to {args.output}")
+    elif args.command == "scan":
+        if args.mirna:
+            mirna_input: str | dict[str, str] = {args.mirna_id: args.mirna}
+        else:
+            mirna_input = args.mirna_fasta
+
+        results = scan_targets(
+            mirna_fasta=mirna_input,
+            target_fasta=args.target_fasta,
+            output_prefix=args.output,
+            device=args.device,
+            batch_size=args.batch_size,
+            prob_threshold=args.threshold,
+            scan_mode=args.scan_mode,
+            stride=args.stride,
+            top_k=args.top_k,
+        )
+        total_hits = sum(len(r.hits) for r in results)
+        print(
+            f"Scan complete: {len(results)} miRNA-target pairs, "
+            f"{total_hits} hits above threshold {args.threshold}"
+        )
+        print(f"Results: {args.output}_details.txt, _hits.tsv, _summary.tsv")
     else:
         parser.print_help()
         sys.exit(1)

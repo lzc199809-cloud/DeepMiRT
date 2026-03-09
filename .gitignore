@@ -65,9 +65,6 @@ wget-log
 # Internal assets (literature pipeline examples)
 deepmirt/assets/
 
-# Scanning module (depends on pipeline, not yet standalone)
-deepmirt/scanning/
-
 # Literature pipeline tests (pipeline itself is excluded)
 deepmirt/tests/test_literature_*
 

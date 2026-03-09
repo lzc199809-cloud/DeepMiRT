@@ -90,6 +90,79 @@ Target (40 nt)    ──→ [RNA-FM Encoder] ──→ target embedding (B, T, 6
 
 </details>
 
+## Genome-Wide Target Scanning
+
+DeepMiRT can scan entire 3'UTR or transcript sequences to identify binding sites genome-wide -- similar to miRanda, but powered by the deep learning model.
+
+### Python API
+
+```python
+from deepmirt import scan_targets
+
+results = scan_targets(
+    mirna_fasta="mirnas.fa",           # or dict: {"let-7": "UGAGGUAGUAGGUUGUAUAGUU"}
+    target_fasta="3utrs.fa",
+    output_prefix="results/scan",      # writes _details.txt, _hits.tsv, _summary.tsv
+    device="cuda",
+    scan_mode="hybrid",                # "seed" | "hybrid" | "exhaustive"
+    prob_threshold=0.5,
+)
+
+for r in results:
+    for hit in r.hits:
+        print(f"{r.target_id} pos={hit.position} prob={hit.probability:.3f} ({hit.seed_type})")
+```
+
+### Command Line
+
+```bash
+# Scan with a FASTA of miRNAs against target 3'UTRs
+deepmirt-predict scan \
+    --mirna-fasta mirnas.fa \
+    --target-fasta 3utrs.fa \
+    --output results/scan \
+    --device cuda \
+    --scan-mode hybrid \
+    --threshold 0.5
+
+# Scan with a single miRNA sequence
+deepmirt-predict scan \
+    --mirna UGAGGUAGUAGGUUGUAUAGUU \
+    --mirna-id dme-let-7 \
+    --target-fasta 3utrs.fa \
+    --output results/scan \
+    --device cpu
+```
+
+### Scanning Modes
+
+| Mode | Strategy | Speed | Use Case |
+|------|----------|-------|----------|
+| `seed` | Only score seed match positions (8mer/7mer/6mer) | Fastest | Quick screen, high-confidence sites |
+| `hybrid` | Seed matches + sliding window (stride=20) to fill gaps | Default | Balanced: catches seed + non-canonical sites |
+| `exhaustive` | Sliding window across entire target | Slowest | Comprehensive, catches everything |
+
+### Output Files
+
+| File | Description |
+|------|-------------|
+| `{prefix}_details.txt` | Human-readable report with ASCII alignment for each hit |
+| `{prefix}_hits.tsv` | Per-hit table: position, probability, seed type, window sequence |
+| `{prefix}_summary.tsv` | Per-target summary: number of hits, max/mean probability |
+
+Example alignment from `_details.txt`:
+
+```
+Scanning: dme-miR-1-3p vs FBTR0082186_3UTR (1247 nt)
+  Hits found: 2
+
+  Hit at position 617, Prob: 0.8923, Seed: 7mer-m8
+
+    miRNA  3' ...uauCCGCGGCCggg... 5'
+                  ||||||||::
+    Target 5' ...aGGCGCCGGAact... 3'
+```
+
 ## Installation
 
 ### From PyPI
@@ -272,8 +345,12 @@ DeepMiRT/
 │   │   └── callbacks.py           # Staged unfreezing callback
 │   ├── data_module/        # Data loading and preprocessing
 │   ├── evaluation/         # 9-step evaluation pipeline
+│   ├── scanning/           # Genome-wide target site scanning
+│   │   ├── scanner.py             # Core TargetScanner class
+│   │   ├── site_finder.py         # Seed match finder
+│   │   └── output_formatter.py    # TXT/TSV output formatters
 │   ├── configs/            # YAML configuration files
-│   ├── predict.py          # Public prediction API
+│   ├── predict.py          # Public prediction & scanning API
 │   └── tests/              # Unit tests
 ├── app.py                  # Gradio web demo
 ├── examples/               # Usage examples
