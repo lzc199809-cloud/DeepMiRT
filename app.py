@@ -45,7 +45,7 @@ def _load_model():
 
     from insect_mirna_target.evaluation.predict import load_model_from_checkpoint
 
-    repo_id = "lzc199809-cloud/deepmirt"
+    repo_id = "liuliu2333/deepmirt"
     ckpt_path = hf_hub_download(repo_id=repo_id, filename="epoch=27-val_auroc=0.9612.ckpt")
     config_path = hf_hub_download(repo_id=repo_id, filename="config.yaml")
 
@@ -241,7 +241,7 @@ def build_demo():
             Predict miRNA-target interactions using RNA-FM embeddings and cross-attention.
             Ranked **#1** on eCLIP benchmarks (AUROC 0.75) and achieves **AUROC 0.96** on our comprehensive test set.
 
-            **Paper:** *coming soon* | **GitHub:** [DeepMiRT](https://github.com/lzc199809-cloud/DeepMiRT) | **Model:** [Hugging Face](https://huggingface.co/lzc199809-cloud/deepmirt)
+            **Paper:** *coming soon* | **GitHub:** [DeepMiRT](https://github.com/lzc199809-cloud/DeepMiRT) | **Model:** [Hugging Face](https://huggingface.co/liuliu2333/deepmirt)
             """
         )
 

@@ -23,7 +23,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 # Hugging Face Hub model repository
-HF_REPO_ID = "lzc199809-cloud/deepmirt"
+HF_REPO_ID = "liuliu2333/deepmirt"
 HF_CKPT_FILENAME = "epoch=27-val_auroc=0.9612.ckpt"
 HF_CONFIG_FILENAME = "config.yaml"
 

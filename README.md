@@ -6,7 +6,7 @@
   <p align="center">
     <a href="https://pypi.org/project/deepmirt/"><img src="https://img.shields.io/pypi/v/deepmirt?color=blue" alt="PyPI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
-    <a href="https://huggingface.co/spaces/lzc199809-cloud/deepmirt"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Demo-yellow" alt="HF Demo"></a>
+    <a href="https://huggingface.co/spaces/liuliu2333/deepmirt"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Demo-yellow" alt="HF Demo"></a>
     <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.9%2B-blue" alt="Python 3.9+"></a>
     <img src="https://img.shields.io/badge/AUROC-0.96-brightgreen" alt="AUROC 0.96">
   </p>
@@ -60,7 +60,7 @@ Model weights are automatically downloaded from Hugging Face Hub on first use (~
 ## Web Demo
 
 Try DeepMiRT without installation:
-**[huggingface.co/spaces/lzc199809-cloud/deepmirt](https://huggingface.co/spaces/lzc199809-cloud/deepmirt)**
+**[huggingface.co/spaces/liuliu2333/deepmirt](https://huggingface.co/spaces/liuliu2333/deepmirt)**
 
 The demo supports single-pair prediction with pre-loaded examples and batch CSV upload.
 
