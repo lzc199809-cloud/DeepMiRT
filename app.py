@@ -242,7 +242,7 @@ def build_demo():
             Predict miRNA-target interactions using RNA-FM embeddings and cross-attention.
             Ranked **#1** on eCLIP benchmarks (AUROC 0.75) and achieves **AUROC 0.96** on our comprehensive test set.
 
-            **Paper:** *coming soon* | **GitHub:** [DeepMiRT](https://github.com/lzc199809-cloud/DeepMiRT) | **Model:** [Hugging Face](https://huggingface.co/liuliu2333/deepmirt)
+            **Paper:** *coming soon* | **GitHub:** [DeepMiRT](https://github.com/zichengll/DeepMiRT) | **Model:** [Hugging Face](https://huggingface.co/liuliu2333/deepmirt)
             """
         )
 
@@ -342,13 +342,13 @@ def build_demo():
                   title={DeepMiRT: miRNA Target Prediction with RNA Foundation Models},
                   author={Liu, Zicheng},
                   year={2026},
-                  url={https://github.com/lzc199809-cloud/DeepMiRT}
+                  url={https://github.com/zichengll/DeepMiRT}
                 }
                 ```
 
                 ## License
 
-                MIT License. See [LICENSE](https://github.com/lzc199809-cloud/DeepMiRT/blob/main/LICENSE).
+                MIT License. See [LICENSE](https://github.com/zichengll/DeepMiRT/blob/main/LICENSE).
                 """
             )
 

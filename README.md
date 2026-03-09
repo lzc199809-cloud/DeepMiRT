@@ -174,7 +174,7 @@ pip install deepmirt
 ### From source (for development)
 
 ```bash
-git clone https://github.com/lzc199809-cloud/DeepMiRT.git
+git clone https://github.com/zichengll/DeepMiRT.git
 cd DeepMiRT
 pip install -e ".[dev,eval]"
 ```
@@ -378,7 +378,7 @@ Contributions are welcome. Please open an issue first to discuss what you would 
   title={DeepMiRT: miRNA Target Prediction with RNA Foundation Models},
   author={Liu, Zicheng},
   year={2026},
-  url={https://github.com/lzc199809-cloud/DeepMiRT}
+  url={https://github.com/zichengll/DeepMiRT}
 }
 ```
 

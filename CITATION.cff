@@ -6,7 +6,7 @@ authors:
   - family-names: "Liu"
     given-names: "Zicheng"
 license: MIT
-repository-code: "https://github.com/lzc199809-cloud/DeepMiRT"
+repository-code: "https://github.com/zichengll/DeepMiRT"
 url: "https://huggingface.co/spaces/liuliu2333/deepmirt"
 version: "1.0.0"
 date-released: "2026-03-09"
