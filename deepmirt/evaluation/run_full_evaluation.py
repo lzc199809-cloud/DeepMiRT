@@ -14,10 +14,10 @@ Execution flow:
 9. Output summary report (Markdown + CSV tables + JSON)
 
 Usage:
-    python -m insect_mirna_target.evaluation.run_full_evaluation \
+    python -m deepmirt.evaluation.run_full_evaluation \
         --ckpt checkpoints/epoch=27-val_auroc=0.9612.ckpt \
-        --config insect_mirna_target/configs/default.yaml \
-        --test-csv insect_mirna_target/data/training/test.csv \
+        --config deepmirt/configs/default.yaml \
+        --test-csv deepmirt/data/training/test.csv \
         --output-dir evaluation_outputs/
 """
 
@@ -30,7 +30,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import yaml
 
@@ -213,7 +212,7 @@ def run_step_5_frequency_bias(
     from .bias_analysis import compute_frequency_summary_table, evaluate_by_frequency_quintile
 
     freq_cfg = eval_cfg.get("frequency_bias", {})
-    train_csv = freq_cfg.get("train_csv", "insect_mirna_target/data/training/train.csv")
+    train_csv = freq_cfg.get("train_csv", "deepmirt/data/training/train.csv")
     tables_dir = Path(output_dir) / "tables"
     tables_dir.mkdir(parents=True, exist_ok=True)
 
@@ -457,10 +456,10 @@ def run_step_9_report(
         "",
         f"- **Brier Score:** {cal_results.get('original', {}).get('brier_score', 'N/A'):.4f}"
         if isinstance(cal_results.get('original', {}).get('brier_score'), float) else
-        f"- **Brier Score:** N/A",
+        "- **Brier Score:** N/A",
         f"- **ECE:** {cal_results.get('original', {}).get('ece', 'N/A'):.4f}"
         if isinstance(cal_results.get('original', {}).get('ece'), float) else
-        f"- **ECE:** N/A",
+        "- **ECE:** N/A",
     ])
 
     if "temperature" in cal_results:
@@ -512,13 +511,13 @@ def run_step_9_report(
             f"- Non-canonical: {seed_results.get('noncanonical_count', 'N/A'):,}",
             f"- Recall (canonical): {seed_results.get('recall_canonical', 'N/A'):.4f}"
             if isinstance(seed_results.get('recall_canonical'), float) else
-            f"- Recall (canonical): N/A",
+            "- Recall (canonical): N/A",
             f"- Recall (non-canonical): {seed_results.get('recall_non-canonical', 'N/A'):.4f}"
             if isinstance(seed_results.get('recall_non-canonical'), float) else
-            f"- Recall (non-canonical): N/A",
+            "- Recall (non-canonical): N/A",
             f"- FN non-canonical %: {seed_results.get('FN_noncanonical_pct', 'N/A'):.1f}%"
             if isinstance(seed_results.get('FN_noncanonical_pct'), float) else
-            f"- FN non-canonical %: N/A",
+            "- FN non-canonical %: N/A",
         ])
 
     report_lines.extend([
@@ -586,12 +585,12 @@ def main():
     )
     parser.add_argument(
         "--config",
-        default="insect_mirna_target/configs/default.yaml",
+        default="deepmirt/configs/default.yaml",
         help="Training config YAML path",
     )
     parser.add_argument(
         "--test-csv",
-        default="insect_mirna_target/data/training/test.csv",
+        default="deepmirt/data/training/test.csv",
         help="Test set CSV path",
     )
     parser.add_argument(

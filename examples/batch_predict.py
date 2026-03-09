@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from insect_mirna_target.predict import predict_from_csv
+from deepmirt.predict import predict_from_csv
 
 # Create a sample CSV
 sample_data = pd.DataFrame(

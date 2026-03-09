@@ -5,8 +5,8 @@
 # Modify this file to tune parameters without changing the code.
 #
 # Usage:
-#   python insect_mirna_target/training/train.py --config insect_mirna_target/configs/default.yaml
-#   python insect_mirna_target/training/train.py --config insect_mirna_target/configs/default.yaml --fast-dev-run
+#   python deepmirt/training/train.py --config deepmirt/configs/default.yaml
+#   python deepmirt/training/train.py --config deepmirt/configs/default.yaml --fast-dev-run
 # ============================================================
 
 # ---- Model architecture ----
@@ -21,7 +21,7 @@ model:
 
 # ---- Data loading ----
 data:
-  data_dir: "insect_mirna_target/data/training"  # Training data directory (contains train.csv, val.csv, test.csv)
+  data_dir: "deepmirt/data/training"  # Training data directory (contains train.csv, val.csv, test.csv)
   batch_size: 128             # Batch size (128-256 recommended, reduce to 64 if GPU memory is insufficient)
   num_workers: 8              # DataLoader worker processes (typically set to 1/4 of CPU cores)
   pin_memory: true            # Pinned memory (recommended true for GPU training, accelerates CPU->GPU data transfer)
@@ -47,7 +47,7 @@ unfreezing:
 # ---- Trainer configuration ----
 trainer:
   accelerator: "gpu"          # Accelerator type: gpu | cpu
-  devices: 2                  # Number of GPUs (this machine has 2x NVIDIA L20)
+  devices: "auto"             # Number of GPUs ("auto" detects available devices)
   strategy: "ddp"             # Distributed strategy: ddp (data parallel) | fsdp (fully sharded data parallel)
 
 # ---- Checkpoint management ----

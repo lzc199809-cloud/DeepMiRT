@@ -36,7 +36,7 @@ def load_model_from_checkpoint(
     Returns:
         (model, config) tuple
     """
-    from insect_mirna_target.training.lightning_module import MiRNATargetLitModule
+    from deepmirt.training.lightning_module import MiRNATargetLitModule
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
@@ -91,8 +91,8 @@ def run_inference(
     # Load data (using DataModule approach for consistency)
     import fm
 
-    from insect_mirna_target.data_module.datamodule import MiRNATargetDataModule
-    from insect_mirna_target.data_module.dataset import MiRNATargetDataset
+    from deepmirt.data_module.datamodule import MiRNATargetDataModule
+    from deepmirt.data_module.dataset import MiRNATargetDataset
 
     _, alphabet = fm.pretrained.rna_fm_t12()
     del _
@@ -211,6 +211,8 @@ def predict_on_sequences(
     target_seqs: list[str],
     batch_size: int = 256,
     device: str = "cuda",
+    _lit_model=None,
+    _alphabet=None,
 ) -> np.ndarray:
     """
     Run inference on arbitrary miRNA + target sequence pairs.
@@ -225,6 +227,8 @@ def predict_on_sequences(
         target_seqs: list of target sequences (DNA or RNA format, should be 40nt)
         batch_size: inference batch size
         device: inference device
+        _lit_model: pre-loaded model (internal use, for caching)
+        _alphabet: pre-loaded alphabet (internal use, for caching)
 
     Returns:
         numpy array of predicted probabilities, shape (n_samples,)
@@ -232,11 +236,17 @@ def predict_on_sequences(
     import fm
     from torch.nn.utils.rnn import pad_sequence
 
-    logger.info(f"Loading model from {ckpt_path}")
-    lit_model, config = load_model_from_checkpoint(ckpt_path, config_path, device)
+    if _lit_model is not None:
+        lit_model = _lit_model
+    else:
+        logger.info(f"Loading model from {ckpt_path}")
+        lit_model, config = load_model_from_checkpoint(ckpt_path, config_path, device)
 
-    _, alphabet = fm.pretrained.rna_fm_t12()
-    del _
+    if _alphabet is not None:
+        alphabet = _alphabet
+    else:
+        _, alphabet = fm.pretrained.rna_fm_t12()
+        del _
     batch_converter = alphabet.get_batch_converter()
     padding_idx = alphabet.padding_idx
 

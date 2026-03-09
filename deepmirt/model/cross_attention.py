@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # pyright: basic, reportMissingImports=false
-“””
+"""
 Cross-Attention interaction module.
 
-Data flow diagram (target as Query, miRNA as Key/Value):
+Data flow diagram (target as Query, miRNA as Key/Value)::
 
     target_emb (B, T, D) -------------------------------> Q
                                                           |
@@ -16,12 +16,12 @@ Data flow diagram (target as Query, miRNA as Key/Value):
 
 Why target=Q and miRNA=K/V:
 - Our task is to determine whether a target is regulated by a given miRNA.
-- Having each target position “query” miRNA information aligns with the semantics
+- Having each target position query miRNA information aligns with the semantics
   of locating potential binding sites on the target.
 
 Mask convention:
-- `key_padding_mask=True` indicates a padding position that should be ignored.
-“””
+- key_padding_mask=True indicates a padding position that should be ignored.
+"""
 
 from __future__ import annotations
 

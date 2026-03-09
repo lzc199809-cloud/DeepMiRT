@@ -2,10 +2,10 @@
 # miRNA target prediction model — default evaluation configuration
 # ============================================================
 # Usage:
-#   python -m insect_mirna_target.evaluation.run_full_evaluation \
+#   python -m deepmirt.evaluation.run_full_evaluation \
 #       --ckpt checkpoints/epoch=27-val_auroc=0.9612.ckpt \
-#       --config insect_mirna_target/configs/default.yaml \
-#       --test-csv insect_mirna_target/data/training/test.csv \
+#       --config deepmirt/configs/default.yaml \
+#       --test-csv deepmirt/data/training/test.csv \
 #       --output-dir evaluation_outputs/
 # ============================================================
 
@@ -33,7 +33,7 @@ calibration:
 frequency_bias:
   n_quintiles: 5
   n_bootstrap: 1000
-  train_csv: "insect_mirna_target/data/training/train.csv"
+  train_csv: "deepmirt/data/training/train.csv"
 
 # ---- Error analysis ----
 error_analysis:

@@ -2,4 +2,4 @@
 
 __version__ = "1.0.0"
 
-from insect_mirna_target.predict import predict
+from deepmirt.predict import predict as predict

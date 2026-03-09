@@ -4,27 +4,27 @@ miRNA-target prediction model -- main training entry script
 
 [Usage]
   # Smoke test (run only 1 batch to verify the pipeline):
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --fast-dev-run
 
   # Full training:
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml
 
   # Override configuration parameters:
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --override training.lr=5e-5 --override data.batch_size=64
 
   # Resume training from a checkpoint (restores epoch, optimizer state, etc.):
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --resume checkpoints/last.ckpt
 
   # Load pretrained weights but restart training (Phase 2 fine-tuning):
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --ckpt-path checkpoints/epoch-4-0.8923.ckpt \\
     --override unfreezing.enabled=true \\
     --override training.lr=5e-5
@@ -76,8 +76,8 @@ import sys
 from pathlib import Path
 
 # Design decision: add the project root directory to the Python path
-# This ensures the insect_mirna_target package can be correctly imported regardless of where the script is run from
-# e.g.: python insect_mirna_target/training/train.py --config ...
+# This ensures the deepmirt package can be correctly imported regardless of where the script is run from
+# e.g.: python deepmirt/training/train.py --config ...
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent.parent)
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
@@ -93,9 +93,9 @@ import torch
 import yaml
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 
-from insect_mirna_target.data_module.datamodule import MiRNATargetDataModule
-from insect_mirna_target.training.callbacks import StagedUnfreezeCallback
-from insect_mirna_target.training.lightning_module import MiRNATargetLitModule
+from deepmirt.data_module.datamodule import MiRNATargetDataModule
+from deepmirt.training.callbacks import StagedUnfreezeCallback
+from deepmirt.training.lightning_module import MiRNATargetLitModule
 
 
 def load_config(config_path: str) -> dict:
@@ -115,13 +115,13 @@ def load_config(config_path: str) -> dict:
     config_file = Path(config_path)
     if not config_file.exists():
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
-    
+
     with open(config_file) as f:
         config = yaml.safe_load(f)
-    
+
     if config is None:
         raise ValueError(f"Configuration file is empty: {config_path}")
-    
+
     return config
 
 
@@ -145,22 +145,22 @@ def apply_overrides(config: dict, overrides: list[str]) -> dict:
     for override in overrides:
         if "=" not in override:
             raise ValueError(f"Invalid override format (expected key=value): {override}")
-        
+
         key_path, value_str = override.split("=", 1)
         keys = key_path.split(".")
-        
+
         # Navigate to the parent dictionary
         d = config
         for k in keys[:-1]:
             if k not in d:
                 raise ValueError(f"Configuration key does not exist: {k} (in path {key_path})")
             d = d[k]
-        
+
         # Set the final value with type inference
         final_key = keys[-1]
         if final_key not in d:
             raise ValueError(f"Configuration key does not exist: {final_key} (in path {key_path})")
-        
+
         # Type inference: try bool -> int -> float -> str
         try:
             # Try boolean (must be before float, since "true" contains "e" which could be misinterpreted as float)
@@ -177,7 +177,7 @@ def apply_overrides(config: dict, overrides: list[str]) -> dict:
                 d[final_key] = value_str
         except (ValueError, AttributeError) as e:
             raise ValueError(f"Cannot parse override parameter {override}: {e}")
-    
+
     return config
 
 
@@ -199,7 +199,7 @@ def build_callbacks(config: dict) -> list:
         List of callbacks
     """
     callbacks = []
-    
+
     # 1. ModelCheckpoint -- save the best models
     # Design decision: rank by val_auroc, keep top-3 best models
     # Naming convention {epoch}-{val_auroc:.4f} for quick identification of the best epoch
@@ -214,7 +214,7 @@ def build_callbacks(config: dict) -> list:
             filename="{epoch}-{val_auroc:.4f}",
         )
     )
-    
+
     # 2. EarlyStopping -- early stopping (if enabled)
     # Design decision: monitor val_loss; stop if no improvement for 5 consecutive epochs
     # Prevents overfitting and saves compute resources
@@ -227,11 +227,11 @@ def build_callbacks(config: dict) -> list:
                 mode=es_cfg["mode"],
             )
         )
-    
+
     # 3. LearningRateMonitor -- monitor learning rate
     # Design decision: log once per step to observe the effect of the LR schedule
     callbacks.append(LearningRateMonitor(logging_interval="step"))
-    
+
     # 4. StagedUnfreezeCallback -- staged unfreezing (if enabled)
     # Design decision: Phase 1 freezes the backbone so new layers converge quickly
     #                  Phase 2 unfreezes the top N layers to fine-tune the backbone
@@ -245,7 +245,7 @@ def build_callbacks(config: dict) -> list:
                 warmup_epochs=unf_cfg.get("warmup_epochs", 1),
             )
         )
-    
+
     return callbacks
 
 
@@ -257,27 +257,27 @@ def main():
         epilog="""
 Examples:
   # Smoke test (verify pipeline, run only 1 batch)
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --fast-dev-run
 
   # Full training
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml
 
   # Override parameters
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --override training.lr=5e-5 --override data.batch_size=64
 
   # Resume interrupted training from a checkpoint
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --resume checkpoints/last.ckpt
 
   # Phase 2: load Phase 1 weights and restart fine-tuning
-  python insect_mirna_target/training/train.py \\
-    --config insect_mirna_target/configs/default.yaml \\
+  python deepmirt/training/train.py \\
+    --config deepmirt/configs/default.yaml \\
     --ckpt-path checkpoints/epoch-4-0.8923.ckpt \\
     --override unfreezing.enabled=true \\
     --override training.lr=5e-5
@@ -315,9 +315,9 @@ Examples:
         default=[],
         help="Override configuration parameters, format: key.subkey=value (can be used multiple times)",
     )
-    
+
     args = parser.parse_args()
-    
+
     # ── Mutual exclusion check ──
     # --resume and --ckpt-path cannot be used together:
     # --resume: restores the full training state (epoch, optimizer, scheduler, random state)
@@ -326,16 +326,16 @@ Examples:
         parser.error("--resume and --ckpt-path cannot be used together.\n"
                       "  --resume: resume interrupted training (full state)\n"
                       "  --ckpt-path: load model weights only (restart training)")
-    
+
     # ── Step 1: Load configuration ──
     print(f"[INFO] Loading configuration file: {args.config}")
     config = load_config(args.config)
-    
+
     # ── Step 2: Apply command-line overrides ──
     if args.override:
         print(f"[INFO] Applying {len(args.override)} override parameter(s)")
         config = apply_overrides(config, args.override)
-    
+
     # ── Step 3: Set random seed ──
     # Design decision: global seed ensures experiment reproducibility
     # Covers Python random, NumPy, PyTorch, and CUDA random number generators
@@ -355,7 +355,7 @@ Examples:
         num_workers=data_cfg["num_workers"],
         pin_memory=data_cfg.get("pin_memory", True),
     )
-    
+
     # ── Step 5: Create LightningModule ──
     # --ckpt-path mode: load model weights from a checkpoint but use the current config's hyperparameters
     # This allows modifying learning rate, unfreezing strategy, etc. in Phase 2 while retaining Phase 1 weights
@@ -367,10 +367,10 @@ Examples:
         print("[INFO] Optimizer and LR scheduler will be re-initialized (loading model weights only)")
 
         checkpoint = torch.load(args.ckpt_path, map_location="cpu", weights_only=False)
-        
+
         # First create the module with current config (ensuring hyperparameters use the new config)
         lit_model = MiRNATargetLitModule(config)
-        
+
         # Extract and load model weights from the checkpoint
         state_dict = checkpoint.get("state_dict", checkpoint)
         missing, unexpected = lit_model.load_state_dict(state_dict, strict=False)
@@ -382,17 +382,17 @@ Examples:
     else:
         print("[INFO] Creating LightningModule")
         lit_model = MiRNATargetLitModule(config)
-    
+
     # ── Step 6: Configure Callbacks ──
     print("[INFO] Configuring Callbacks")
     callbacks = build_callbacks(config)
-    
+
     # ── Step 7: Create Trainer ──
     print("[INFO] Creating Trainer")
     trainer_cfg = config["trainer"]
     log_cfg = config.get("logging", {})
     train_cfg = config["training"]
-    
+
     # Configure logging backend
     # Design decision: TensorBoard uses local storage, no login required, privacy-friendly
     logger = None
@@ -403,7 +403,7 @@ Examples:
         )
     else:
         logger = True  # Use Lightning's default logger
-    
+
     trainer = pl.Trainer(
         accelerator=trainer_cfg.get("accelerator", "gpu"),
         devices=trainer_cfg.get("devices", 2),
@@ -417,7 +417,7 @@ Examples:
         log_every_n_steps=log_cfg.get("log_every_n_steps", 50),
         fast_dev_run=args.fast_dev_run,
     )
-    
+
     # ── Step 8: Start training ──
     # --resume mode: pass ckpt_path to trainer.fit(); Lightning automatically restores:
     #   - Model weights
@@ -433,10 +433,10 @@ Examples:
             raise FileNotFoundError(f"Checkpoint file not found: {args.resume}")
         resume_path = args.resume
         print(f"[INFO] Resuming training from checkpoint: {resume_path}")
-    
+
     print("[INFO] Starting training...")
     trainer.fit(lit_model, dm, ckpt_path=resume_path)
-    
+
     print("[INFO] Training complete!")
 
 

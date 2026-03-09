@@ -17,11 +17,9 @@ Error analysis: FP/FN characterization, seed match analysis.
 from __future__ import annotations
 
 import logging
-from collections import Counter
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score, average_precision_score
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 """Minimal example: predict a single miRNA-target interaction."""
 
-from insect_mirna_target import predict
+from deepmirt import predict
 
 probs = predict(
     mirna_seqs=["UGAGGUAGUAGGUUGUAUAGUU"],

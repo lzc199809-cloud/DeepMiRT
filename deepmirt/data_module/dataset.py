@@ -63,7 +63,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from insect_mirna_target.data_module.preprocessing import dna_to_rna
+from deepmirt.data_module.preprocessing import dna_to_rna
 
 
 class MiRNATargetDataset(Dataset):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pyright: basic, reportMissingImports=false
 """
-Custom Lightning Callbacks -- staged unfreezing + insect species-level metrics.
+Custom Lightning Callbacks -- staged unfreezing + species-level metrics.
 
 [What is a Callback?]
 A Callback is a "hook" function that Lightning calls at specific points in the training loop.
@@ -33,11 +33,11 @@ Advantage: Separation of Concerns --
        Analogy: similar to fine-tuning BERT where the bottom embedding + first few Transformer layers
                 are typically frozen, and only the top layers + classifier head are fine-tuned.
 
-    2. InsectMetricsCallback
+    2. SpeciesMetricsCallback
        ────────────────────
-       (Extension goal) Computes validation metrics grouped by insect species.
+       (Extension goal) Computes validation metrics grouped by species.
        If the batch contains metadata (species information), computes separate
-       AUROC/AUPRC for Drosophila melanogaster.
+       AUROC/AUPRC per species.
 
        Current implementation: defensively checks if metadata exists; silently skips if not.
 """
@@ -170,14 +170,13 @@ class StagedUnfreezeCallback(pl.Callback):
         self._step_warmup(trainer, pl_module)
 
 
-class InsectMetricsCallback(pl.Callback):
+class SpeciesMetricsCallback(pl.Callback):
     """
-    (Extension goal) Callback that computes validation metrics grouped by insect species.
+    (Extension goal) Callback that computes validation metrics grouped by species.
 
     Design intent:
     - miRNA-target prediction performance may vary across species
-    - Drosophila melanogaster has the most abundant data and serves as the primary benchmark species
-    - Per-species evaluation helps identify whether the model generalizes poorly to certain species
+    - Per-species evaluation helps identify whether the model generalizes poorly to specific species
 
     Current limitations:
     - The DataModule's collate_fn currently only outputs tokens + labels + masks,
@@ -192,8 +191,9 @@ class InsectMetricsCallback(pl.Callback):
     3. At epoch end, compute AUROC / AUPRC grouped by species
     """
 
-    def __init__(self) -> None:
+    def __init__(self, target_species: str = "Homo sapiens") -> None:
         super().__init__()
+        self.target_species = target_species
         # Collect prediction results from each validation step
         self._val_outputs: list[dict] = []
 
@@ -259,8 +259,8 @@ class InsectMetricsCallback(pl.Callback):
             self._val_outputs.clear()
             return
 
-        # Compute by species group (focus on Drosophila)
-        target_species = "Drosophila melanogaster"
+        # Compute metrics for the configured target species
+        target_species = self.target_species
         species_mask = [s == target_species for s in all_species]
         species_mask_tensor = torch.tensor(species_mask, dtype=torch.bool)
 
@@ -274,11 +274,12 @@ class InsectMetricsCallback(pl.Callback):
             sp_auroc = auroc_fn(sp_probs, sp_labels)
             sp_auprc = auprc_fn(sp_probs, sp_labels)
 
-            pl_module.log("val_dmel_auroc", sp_auroc, on_epoch=True)
-            pl_module.log("val_dmel_auprc", sp_auprc, on_epoch=True)
+            species_key = target_species.split()[-1].lower()[:4]
+            pl_module.log(f"val_{species_key}_auroc", sp_auroc, on_epoch=True)
+            pl_module.log(f"val_{species_key}_auprc", sp_auprc, on_epoch=True)
 
             print(
-                f"[InsectMetrics] {target_species}: "
+                f"[SpeciesMetrics] {target_species}: "
                 f"AUROC={sp_auroc:.4f}, AUPRC={sp_auprc:.4f} "
                 f"(n={species_mask_tensor.sum().item()})"
             )

@@ -59,13 +59,13 @@ def dna_to_rna(seq: str) -> str:
     """
     # Step 1: Convert to uppercase
     seq = str(seq).upper()
-    
+
     # Step 2: Remove all whitespace characters (spaces, tabs, newlines)
     seq = seq.replace(" ", "").replace("\t", "").replace("\n", "").replace("\r", "")
-    
+
     # Step 3: Convert T (DNA) to U (RNA)
     seq = seq.replace("T", "U")
-    
+
     return seq
 
 
@@ -106,10 +106,10 @@ def validate_rna_sequence(seq: str, min_len: int = 5, max_len: int = 100) -> boo
     # Check length
     if len(seq) < min_len or len(seq) > max_len:
         return False
-    
+
     # Define valid RNA character set
     valid_chars = {"A", "U", "G", "C", "N"}
-    
+
     # Check if all characters are valid
     for char in seq:
         if char not in valid_chars:
@@ -118,7 +118,7 @@ def validate_rna_sequence(seq: str, min_len: int = 5, max_len: int = 100) -> boo
                 return False
             # Other invalid characters also return False
             return False
-    
+
     return True
 
 
@@ -153,7 +153,7 @@ def prepare_rnafm_input(mirna_seq: str, target_seq: str) -> tuple[str, str]:
     # Convert the two sequences separately
     mirna_rna = dna_to_rna(mirna_seq)
     target_rna = dna_to_rna(target_seq)
-    
+
     return mirna_rna, target_rna
 
 
@@ -191,46 +191,46 @@ def compute_sequence_stats(csv_path: str, sample_n: int = 10000) -> dict:
             - 'target_with_t_count': number of target sequences containing T
 
     Example:
-        >>> stats = compute_sequence_stats('insect_mirna_target/data/training/train.csv', sample_n=100)
+        >>> stats = compute_sequence_stats('deepmirt/data/training/train.csv', sample_n=100)
         >>> print(f"Total rows: {stats['total_rows']}")
         >>> print(f"miRNA length range: {stats['mirna_length_min']}-{stats['mirna_length_max']}")
     """
     # Lazy-import pandas to avoid introducing a heavy dependency at module load time
     import pandas as pd
-    
+
     # Read the CSV file
     df = pd.read_csv(csv_path)
-    
+
     # Compute total number of rows
     total_rows = len(df)
-    
+
     # Determine sample size (capped at total number of rows)
     actual_sample_n = min(sample_n, total_rows)
-    
+
     # Sample data
     if actual_sample_n < total_rows:
         sample_df = df.sample(n=actual_sample_n, random_state=42)
     else:
         sample_df = df
-    
+
     # Initialize statistics dictionary
     stats = {
         'total_rows': total_rows,
         'sample_rows': len(sample_df),
     }
-    
+
     # Compute miRNA sequence statistics
     mirna_lengths = sample_df['mirna_seq'].str.len()
     stats['mirna_length_min'] = int(mirna_lengths.min())
     stats['mirna_length_max'] = int(mirna_lengths.max())
     stats['mirna_length_mean'] = float(mirna_lengths.mean())
-    
+
     # Compute target sequence statistics
     target_lengths = sample_df['target_fragment_40nt'].str.len()
     stats['target_length_min'] = int(target_lengths.min())
     stats['target_length_max'] = int(target_lengths.max())
     stats['target_length_mean'] = float(target_lengths.mean())
-    
+
     # Compute character frequencies
     def compute_char_freq(seq_series):
         """Compute the frequency of each character in the sequences"""
@@ -240,12 +240,12 @@ def compute_sequence_stats(csv_path: str, sample_n: int = 10000) -> dict:
             for char in seq:
                 freq[char] = freq.get(char, 0) + 1
         return freq
-    
+
     stats['mirna_char_freq'] = compute_char_freq(sample_df['mirna_seq'])
     stats['target_char_freq'] = compute_char_freq(sample_df['target_fragment_40nt'])
-    
+
     # Count sequences containing T (DNA notation)
     stats['mirna_with_t_count'] = (sample_df['mirna_seq'].str.contains('T', case=False, na=False)).sum()
     stats['target_with_t_count'] = (sample_df['target_fragment_40nt'].str.contains('T', case=False, na=False)).sum()
-    
+
     return stats

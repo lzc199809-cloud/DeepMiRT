@@ -27,9 +27,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.patches import FancyBboxPatch
 from sklearn.metrics import (
-    auc,
     average_precision_score,
     confusion_matrix,
     f1_score,

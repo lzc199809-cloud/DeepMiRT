@@ -19,6 +19,7 @@ from pathlib import Path
 import gradio as gr
 import numpy as np
 import pandas as pd
+import torch
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 _model = None
 _alphabet = None
 _config = None
-_device = "cpu"
+_device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def _load_model():
@@ -43,7 +44,7 @@ def _load_model():
     import torch
     from huggingface_hub import hf_hub_download
 
-    from insect_mirna_target.evaluation.predict import load_model_from_checkpoint
+    from deepmirt.evaluation.predict import load_model_from_checkpoint
 
     repo_id = "liuliu2333/deepmirt"
     ckpt_path = hf_hub_download(repo_id=repo_id, filename="epoch=27-val_auroc=0.9612.ckpt")
@@ -319,7 +320,7 @@ def build_demo():
 
                 ## Training
 
-                - **Data:** Insect miRNA-target interactions from 6 databases + literature mining
+                - **Data:** miRNA-target interactions from multiple databases and literature mining
                 - **Two-phase training:** Phase 1 (frozen backbone) → Phase 2 (unfreeze top 3 RNA-FM layers)
                 - **Hardware:** 2× NVIDIA L20 GPUs, mixed-precision (fp16)
                 - **Best checkpoint:** epoch 27, val AUROC = 0.9612

@@ -25,7 +25,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
-    accuracy_score,
     average_precision_score,
     f1_score,
     matthews_corrcoef,
@@ -35,7 +34,7 @@ from sklearn.metrics import (
 )
 
 from .error_analysis import find_seed_match
-from .metrics import compute_all_metrics, compute_specificity
+from .metrics import compute_specificity
 
 logger = logging.getLogger(__name__)
 

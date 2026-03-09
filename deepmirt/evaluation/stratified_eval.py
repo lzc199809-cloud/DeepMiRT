@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import logging
 
-import numpy as np
 import pandas as pd
 
 from .metrics import compute_all_metrics, compute_metrics_with_ci

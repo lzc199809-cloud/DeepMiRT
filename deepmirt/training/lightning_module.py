@@ -91,7 +91,7 @@ import torchmetrics
 from torch import nn
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
-from insect_mirna_target.model.mirna_target_model import MiRNATargetModel
+from deepmirt.model.mirna_target_model import MiRNATargetModel
 
 
 class MiRNATargetLitModule(pl.LightningModule):

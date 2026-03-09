@@ -42,7 +42,7 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 
-from insect_mirna_target.data_module.dataset import MiRNATargetDataset
+from deepmirt.data_module.dataset import MiRNATargetDataset
 
 
 class MiRNATargetDataModule(pl.LightningDataModule):

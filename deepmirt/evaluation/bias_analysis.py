@@ -203,7 +203,7 @@ def compute_frequency_summary_table(
         }
 
         if labels.sum() > 0 and labels.sum() < len(labels):
-            from sklearn.metrics import roc_auc_score, average_precision_score
+            from sklearn.metrics import average_precision_score, roc_auc_score
 
             row["AUROC"] = roc_auc_score(labels, probs)
             row["AUPRC"] = average_precision_score(labels, probs)

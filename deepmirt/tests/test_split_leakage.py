@@ -6,12 +6,12 @@ Verifies that train/val/test splits have no overlapping records,
 no label conflicts, no intra-split duplicates, and balanced class distribution.
 
 Run with:
-    python -m pytest insect_mirna_target/tests/test_split_leakage.py -v
-    python -m unittest insect_mirna_target.tests.test_split_leakage -v
+    python -m pytest deepmirt/tests/test_split_leakage.py -v
+    python -m unittest deepmirt.tests.test_split_leakage -v
 """
 
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent.parent)
@@ -20,7 +20,7 @@ if _PROJECT_ROOT not in sys.path:
 
 import pandas as pd
 
-DATA_DIR = Path(_PROJECT_ROOT) / "insect_mirna_target" / "data" / "training"
+DATA_DIR = Path(_PROJECT_ROOT) / "deepmirt" / "data" / "training"
 CURRICULUM_DIR = DATA_DIR / "curriculum"
 DEDUP_KEY = ["mirna_seq", "target_fragment_40nt"]
 
@@ -103,11 +103,11 @@ class TestSplitLeakage(unittest.TestCase):
             train_test_overlap = train_set & test_set
             val_test_overlap = val_set & test_set
 
-            self.assertEqual(len(train_val_overlap), 0, 
+            self.assertEqual(len(train_val_overlap), 0,
                            f"{tier}: train-val overlap: {len(train_val_overlap)} records")
-            self.assertEqual(len(train_test_overlap), 0, 
+            self.assertEqual(len(train_test_overlap), 0,
                            f"{tier}: train-test overlap: {len(train_test_overlap)} records")
-            self.assertEqual(len(val_test_overlap), 0, 
+            self.assertEqual(len(val_test_overlap), 0,
                            f"{tier}: val-test overlap: {len(val_test_overlap)} records")
 
     def test_final_dataset_matches_splits(self):
@@ -121,11 +121,11 @@ class TestSplitLeakage(unittest.TestCase):
         final_val_count = (final_df["split"] == "val").sum()
         final_test_count = (final_df["split"] == "test").sum()
 
-        self.assertEqual(final_train_count, len(train_df), 
+        self.assertEqual(final_train_count, len(train_df),
                         f"final_dataset train rows {final_train_count} != train.csv {len(train_df)}")
-        self.assertEqual(final_val_count, len(val_df), 
+        self.assertEqual(final_val_count, len(val_df),
                         f"final_dataset val rows {final_val_count} != val.csv {len(val_df)}")
-        self.assertEqual(final_test_count, len(test_df), 
+        self.assertEqual(final_test_count, len(test_df),
                         f"final_dataset test rows {final_test_count} != test.csv {len(test_df)}")
 
 

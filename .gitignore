@@ -16,7 +16,7 @@ checkpoints/
 *.ckpt
 
 # Training data (too large for Git)
-insect_mirna_target/data/
+deepmirt/data/
 
 # Study data (very large)
 study/
@@ -40,7 +40,7 @@ session_exports/
 literature_download_system/
 
 # Internal pipeline scripts (data preprocessing)
-insect_mirna_target/pipeline/
+deepmirt/pipeline/
 
 # One-off scripts (not part of the package)
 convert_sessions_to_md.py
@@ -52,8 +52,8 @@ run_comparison_only.py
 AGENTS.md
 LOGGING_GUIDE.md
 TRAINING_GUIDE.md
-insect_mirna_target/MANUAL_RUN_GUIDE.md
-insect_mirna_target/requirements-ml.txt
+deepmirt/MANUAL_RUN_GUIDE.md
+deepmirt/requirements-ml.txt
 
 # Internal tool scripts
 tools_*.sh
@@ -61,11 +61,15 @@ tools_*.py
 wget-log
 调试日志
 
+
 # Internal assets (literature pipeline examples)
-insect_mirna_target/assets/
+deepmirt/assets/
+
+# Scanning module (depends on pipeline, not yet standalone)
+deepmirt/scanning/
 
 # Literature pipeline tests (pipeline itself is excluded)
-insect_mirna_target/tests/test_literature_*
+deepmirt/tests/test_literature_*
 
 # IDE
 .vscode/

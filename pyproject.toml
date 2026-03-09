@@ -45,7 +45,7 @@ eval = ["matplotlib", "seaborn"]
 dev = ["pytest", "ruff"]
 
 [project.scripts]
-deepmirt-predict = "insect_mirna_target.predict:cli_main"
+deepmirt-predict = "deepmirt.predict:cli_main"
 
 [project.urls]
 Homepage = "https://github.com/lzc199809-cloud/DeepMiRT"
@@ -54,7 +54,7 @@ Repository = "https://github.com/lzc199809-cloud/DeepMiRT"
 Issues = "https://github.com/lzc199809-cloud/DeepMiRT/issues"
 
 [tool.setuptools.packages.find]
-include = ["insect_mirna_target*"]
+include = ["deepmirt*"]
 
 [tool.ruff]
 line-length = 100

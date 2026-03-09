@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -27,6 +29,12 @@ HF_REPO_ID = "liuliu2333/deepmirt"
 HF_CKPT_FILENAME = "epoch=27-val_auroc=0.9612.ckpt"
 HF_CONFIG_FILENAME = "config.yaml"
 
+# Valid nucleotide characters (before T→U conversion)
+_VALID_BASES = re.compile(r"^[AUGCTaugct]+$")
+
+# Module-level model cache (avoids reloading 495 MB on every call)
+_model_cache: dict = {}
+
 
 def _get_model_files() -> tuple[str, str]:
     """Download model checkpoint and config from Hugging Face Hub (cached locally)."""
@@ -35,6 +43,74 @@ def _get_model_files() -> tuple[str, str]:
     ckpt_path = hf_hub_download(repo_id=HF_REPO_ID, filename=HF_CKPT_FILENAME)
     config_path = hf_hub_download(repo_id=HF_REPO_ID, filename=HF_CONFIG_FILENAME)
     return ckpt_path, config_path
+
+
+def _get_cached_model(device: str):
+    """Load model and alphabet, caching for subsequent calls."""
+    if device not in _model_cache:
+        import fm
+
+        from deepmirt.evaluation.predict import load_model_from_checkpoint
+
+        ckpt_path, config_path = _get_model_files()
+        logger.info("Loading DeepMiRT model (first call, will be cached)...")
+        lit_model, config = load_model_from_checkpoint(ckpt_path, config_path, device)
+        _, alphabet = fm.pretrained.rna_fm_t12()
+        _model_cache[device] = (lit_model, alphabet, ckpt_path, config_path)
+        logger.info("Model loaded and cached.")
+
+    return _model_cache[device]
+
+
+def _validate_sequences(
+    mirna_seqs: list[str], target_seqs: list[str]
+) -> tuple[list[str], list[str]]:
+    """Validate and clean input sequences."""
+    cleaned_mirna = []
+    cleaned_target = []
+
+    for i, (m, t) in enumerate(zip(mirna_seqs, target_seqs)):
+        m = str(m).strip().upper()
+        t = str(t).strip().upper()
+
+        if not m:
+            raise ValueError(f"Empty miRNA sequence at index {i}")
+        if not t:
+            raise ValueError(f"Empty target sequence at index {i}")
+
+        if not _VALID_BASES.match(m):
+            invalid = set(m) - set("AUGCT")
+            raise ValueError(
+                f"miRNA at index {i} contains invalid characters: {invalid}. "
+                f"Only A/U/G/C/T are allowed."
+            )
+        if not _VALID_BASES.match(t):
+            invalid = set(t) - set("AUGCT")
+            raise ValueError(
+                f"Target at index {i} contains invalid characters: {invalid}. "
+                f"Only A/U/G/C/T are allowed."
+            )
+
+        cleaned_mirna.append(m)
+        cleaned_target.append(t)
+
+    # Warn about unusual lengths (non-blocking)
+    mirna_lens = [len(s) for s in cleaned_mirna]
+    target_lens = [len(s) for s in cleaned_target]
+    if any(n < 15 or n > 30 for n in mirna_lens):
+        warnings.warn(
+            "Some miRNA sequences have unusual length (expected 18-25 nt). "
+            "Results may be less reliable.",
+            stacklevel=3,
+        )
+    if any(n != 40 for n in target_lens):
+        warnings.warn(
+            "Some target sequences are not 40 nt. The model was trained on 40-nt "
+            "target fragments. Results may be less reliable for other lengths.",
+            stacklevel=3,
+        )
+
+    return cleaned_mirna, cleaned_target
 
 
 def predict(
@@ -47,7 +123,8 @@ def predict(
     Predict miRNA-target interaction probabilities.
 
     Automatically downloads model weights from Hugging Face Hub on first call.
-    Sequences can be in DNA (T) or RNA (U) format — conversion is handled internally.
+    The model is cached in memory for subsequent calls.
+    Sequences can be in DNA (T) or RNA (U) format -- conversion is handled internally.
 
     Args:
         mirna_seqs: List of miRNA sequences (typically 18-25 nt).
@@ -60,7 +137,7 @@ def predict(
         Values range from 0 (no interaction) to 1 (strong interaction).
 
     Example:
-        >>> from insect_mirna_target import predict
+        >>> from deepmirt import predict
         >>> probs = predict(
         ...     mirna_seqs=["UGAGGUAGUAGGUUGUAUAGUU"],
         ...     target_seqs=["ACUGCAGCAUAUCUACUAUUUGCUACUGUAACCAUUGAUCU"],
@@ -75,9 +152,11 @@ def predict(
     if len(mirna_seqs) == 0:
         return np.array([])
 
-    from insect_mirna_target.evaluation.predict import predict_on_sequences
+    mirna_seqs, target_seqs = _validate_sequences(mirna_seqs, target_seqs)
 
-    ckpt_path, config_path = _get_model_files()
+    from deepmirt.evaluation.predict import predict_on_sequences
+
+    lit_model, alphabet, ckpt_path, config_path = _get_cached_model(device)
 
     return predict_on_sequences(
         ckpt_path=ckpt_path,
@@ -86,6 +165,8 @@ def predict(
         target_seqs=target_seqs,
         batch_size=batch_size,
         device=device,
+        _lit_model=lit_model,
+        _alphabet=alphabet,
     )
 
 
