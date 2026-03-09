@@ -6,7 +6,7 @@ import csv
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from deepmirt.pipeline.site_utils import _normalize_dna
+from deepmirt.scanning._utils import _normalize_dna
 
 if TYPE_CHECKING:
     from deepmirt.scanning.scanner import TargetScanResult
@@ -36,7 +36,7 @@ def _generate_alignment(mirna_seq: str, window_seq: str, seed_type: str) -> str:
     # The window was extracted centered on the seed match, so the seed match
     # is near the center of the window. Find the core seed complement (7mer-m8
     # = RC of miRNA positions 2-8) to anchor the alignment correctly.
-    from deepmirt.pipeline.site_utils import get_mirna_seed
+    from deepmirt.scanning._utils import get_mirna_seed
     _, seed_7mer_m8, _, seed_6mer = get_mirna_seed(mirna_seq)
 
     # Find the 7mer-m8 (RC of positions 2-8) in the window for anchoring

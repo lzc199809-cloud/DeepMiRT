@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from deepmirt.pipeline.site_utils import _normalize_dna, get_mirna_seed
+from deepmirt.scanning._utils import _normalize_dna, get_mirna_seed
 
 
 @dataclass

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from deepmirt.pipeline.site_utils import (
+from deepmirt.scanning._utils import (
     _iter_fasta_records,
     _normalize_dna,
     extract_window,
